@@ -1,2 +1,2 @@
-ipywidgets==7.6.3
-ipython==7.26.0
+ipywidgets
+ipython
