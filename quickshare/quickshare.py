@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import json
 import tempfile
 import subprocess
@@ -243,10 +244,17 @@ def _get_file_html(s3_uri):
                 filename = ".".join(filename.split(".")[0:-1]) + EXTENSION
             temp = f"{TMPDIR}/{filename}"
             _run_command(["aws", "s3", "cp", s3_uri, temp])
-            _run_command(
-                ["jupyter", "nbconvert", "--to", "HTML", temp, "--template", "classic"]
-            )
+            try:
+                _run_command(
+                    ["jupyter", "nbconvert", "--to", "HTML", temp, "--template", "classic"]
+                )
+            except Exception as ex:
+                print(ex)
             filename = temp.rstrip(EXTENSION) + ".html"
+            if not os.path.exists(filename):
+                _run_command(
+                    ["cp", temp, filename]
+                )                
             with open(filename) as f:
                 html = f.read()
 
