@@ -230,8 +230,14 @@ def _get_s3_files(bucket, folder):
             ]
         )
     )
-    files = [n["Key"].replace(folder, "") for n in response["Contents"]]
+    files = response["Contents"]
+    files.sort(key=lambda x: x['LastModified'], reverse=True)
+    files = [n["Key"].replace(folder, "") for n in files]
     files = [n for n in files if n.lower().startswith("/_hide_") is False]
+    
+    #files = [n["Key"].replace(folder, "") for n in response["Contents"]]
+    #files = [n for n in files if n.lower().startswith("/_hide_") is False]
+    
     return bucket, folder, files
 
 
