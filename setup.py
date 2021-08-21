@@ -5,7 +5,7 @@ from distutils.core import setup
 
 setup(
     name='quickshare',
-    version='0.4',
+    version='0.5',
     packages=['quickshare'],
     #install_requires=requirements,
     install_requires=[

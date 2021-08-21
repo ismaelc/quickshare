@@ -231,13 +231,13 @@ def _get_s3_files(bucket, folder):
         )
     )
     files = response["Contents"]
-    files.sort(key=lambda x: x['LastModified'], reverse=True)
+    files.sort(key=lambda x: x["LastModified"], reverse=True)
     files = [n["Key"].replace(folder, "") for n in files]
     files = [n for n in files if n.lower().startswith("/_hide_") is False]
-    
-    #files = [n["Key"].replace(folder, "") for n in response["Contents"]]
-    #files = [n for n in files if n.lower().startswith("/_hide_") is False]
-    
+
+    # files = [n["Key"].replace(folder, "") for n in response["Contents"]]
+    # files = [n for n in files if n.lower().startswith("/_hide_") is False]
+
     return bucket, folder, files
 
 
@@ -245,22 +245,39 @@ def _get_file_html(s3_uri):
     html = ""
     if s3_uri:
         try:
+            # Get filename from s3 uri
             filename = s3_uri.split("/").pop()
-            if filename.lower().endswith(EXTENSION):
-                filename = ".".join(filename.split(".")[0:-1]) + EXTENSION
+
+            # Copy file to local tmp folder
             temp = f"{TMPDIR}/{filename}"
             _run_command(["aws", "s3", "cp", s3_uri, temp])
+
+            # Convert to html
             try:
                 _run_command(
-                    ["jupyter", "nbconvert", "--to", "HTML", temp, "--template", "classic"]
+                    [
+                        "jupyter",
+                        "nbconvert",
+                        "--to",
+                        "HTML",
+                        temp,
+                        "--template",
+                        "classic",
+                    ]
                 )
             except Exception as ex:
                 print(ex)
-            filename = temp.rstrip(EXTENSION) + ".html"
+
+            # Get new html filename
+            filename = (
+                temp.replace(EXTENSION, ".html") if temp.endswith(EXTENSION) else temp
+            )
+
+            # If nbconvert can't convert, still try to show to browser
             if not os.path.exists(filename):
-                _run_command(
-                    ["cp", temp, filename]
-                )                
+                _run_command(["cp", temp, filename])
+
+            # Read HTML
             with open(filename) as f:
                 html = f.read()
 
